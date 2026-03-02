@@ -1,6 +1,3 @@
-from pypandoc import convert_text
-
-readme_full = """
 # 🌱 Sprout  
 ### A Calm Computing Wearable for Posture Awareness & Focus Cultivation
 
@@ -317,7 +314,7 @@ It makes posture visible.
 
 ## Demo
 
-(Insert video link)
+
 
 ---
 
