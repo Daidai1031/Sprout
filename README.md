@@ -2,8 +2,6 @@
 
 > *"Don't interrupt. Visualize."*
 
-**Authors:** Jessica Chi · Dingran Dai  
-**Repository:** [Daidai1031/Sprout](https://github.com/Daidai1031/Sprout)  
 **Platform:** ESP32-S2 Feather + CircuitPython 9.x
 
 ---
