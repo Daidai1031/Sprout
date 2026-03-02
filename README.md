@@ -1,151 +1,330 @@
-# 🌱 Sprout
+from pypandoc import convert_text
 
-**A Calm Computing Wearable for Posture Awareness and Focus
-Cultivation**
+readme_full = """
+# 🌱 Sprout  
+### A Calm Computing Wearable for Posture Awareness & Focus Cultivation
 
-------------------------------------------------------------------------
+---
 
-## Introduction
+## 1. Project Vision
 
-Sprout is a wearable posture-awareness device built using the **ESP32-S2
-Feather with TFT display** and the **ICM-20948 9-DoF IMU sensor**.
+Sprout is a calm-computing wearable that transforms posture sensing into a living visual metaphor.
 
-The project explores how motion sensing, real-time data processing, and
-visual feedback can be combined into a calm computing wearable that
-supports children in developing healthy sitting posture and sustained
-focus.
+Instead of correcting posture through vibration or sound alerts, Sprout reflects behavior through motion, color, and accumulation. It is designed for children developing sitting habits and sustained attention.
 
-Rather than using sound, vibration, or disruptive alerts, Sprout
-translates posture data into an evolving visual ecosystem --- a
-collection of colored bubbles that grow, drift, and respond to body
-movement over time.
+The core idea:
 
-------------------------------------------------------------------------
+- Upright posture → Growth
+- Tilt → Drift
+- Time → Memory
 
-## Concept
+Sprout does not interrupt.  
+Sprout visualizes.
 
-Sprout is designed around a simple metaphor:
+---
 
--   **Upright posture = healthy growth**
--   **Tilted posture = directional drift**
+## 2. Design Motivation
 
-Instead of punishing incorrect posture, the device visualizes posture
-behavior over time. The longer a posture is held, the larger its bubble
-becomes.
+Traditional posture devices rely on:
 
-The goal is to cultivate awareness rather than enforce correction.
+- Vibration alerts
+- Audio warnings
+- Threshold-triggered correction
 
-------------------------------------------------------------------------
+These approaches interrupt focus and can create negative feedback loops.
 
-## Hardware Components
+Sprout explores:
 
--   ESP32-S2 Feather with TFT display\
--   InvenSense ICM-20948 9-DoF IMU\
--   APDS-9960 proximity sensor\
--   LiPo battery\
--   STEMMA-QT cable
+- Embodied visualization
+- Calm computing principles
+- Behavior reflection instead of correction
+- Habit formation through accumulated visual memory
 
-------------------------------------------------------------------------
+---
 
-## Wearable Placement
+## 3. System Overview
 
-Sprout is designed as a chest-mounted clip.
+### Hardware
+
+- ESP32-S2 Feather with TFT display  
+- ICM-20948 9-DoF IMU  
+- APDS-9960 proximity sensor  
+- LiPo battery  
+- STEMMA-QT cable  
+
+### Wearable Placement
+
+Chest-mounted clip to capture torso orientation.
 
 Why chest placement?
 
--   Gravity vector accurately reflects torso tilt
--   Roll and pitch angles correspond to real posture
--   Less noise than wrist-mounted sensing
--   Stable baseline calibration
+- Gravity vector reflects spinal alignment
+- Stable roll/pitch reference
+- Less noise than wrist-mounted sensing
 
-------------------------------------------------------------------------
+---
 
-## Interaction Flow
+## 4. Interaction Flow
 
-### 1. Idle Mode
+### Idle
+- Screen off
+- Proximity wake
 
--   Screen off
--   Proximity sensor wakes device
+### Ready Screen
+Educator selects duration:
 
-### 2. Ready Screen
+- 10 min – habit formation
+- 20 min – elementary focus window
+- 30 min – Pomodoro duration
 
-Educator selects session duration: - 10 minutes - 20 minutes - 30
-minutes
+Blinking prompt encourages button press.
 
-### 3. Upright Calibration (5 Seconds)
+---
 
-After button press: 1. Ready screen disappears 2. "Sit up straight"
-screen appears 3. 5-second countdown begins 4. IMU data averaged during
-countdown
+### Upright Calibration (5 Seconds)
 
-This establishes a personalized upright baseline.
+After button press:
 
-------------------------------------------------------------------------
+1. READY screen disappears
+2. Calibration screen appears
+3. “Sit up straight” displayed (scale=2)
+4. Tree icon shown (scale=2)
+5. 5-second countdown
+6. IMU roll/pitch averaged
 
-## IMU Processing Pipeline
+This establishes personalized upright baseline.
 
-roll = atan2(ay, az)\
+---
+
+## 5. Technical Pipeline
+
+### Step 1 – IMU Processing
+
+Acceleration → Roll & Pitch
+
+roll  = atan2(ay, az)  
 pitch = atan2(-ax, sqrt(ay² + az²))
 
-roll_offset = roll - roll_reference\
+Converted to degrees.
+
+---
+
+### Step 2 – Baseline Compensation
+
+roll_offset  = roll  - roll_reference  
 pitch_offset = pitch - pitch_reference
 
-------------------------------------------------------------------------
+---
 
-## Visualization System
+### Step 3 – Posture Classification
 
-Bubble radius is proportional to posture duration.
+| State | Threshold | Color |
+|--------|-----------|--------|
+| UPRIGHT | ±6° | Green |
+| FORWARD | roll < -9° | Red |
+| BACKWARD | roll > 9° | Gray |
+| LEFT | pitch < -6° | Orange |
+| RIGHT | pitch > 6° | Yellow |
 
-r = R_MIN + (hold_time / 10s) \* (R_MAX - R_MIN)\
-r \*= 0.6
+Left/right are intentionally more sensitive.
 
-Spatial Anchors: - UPRIGHT → Center - FORWARD → Top - BACKWARD →
-Bottom - LEFT → Left side - RIGHT → Right side
+---
 
-------------------------------------------------------------------------
+### Step 4 – Temporal Filtering
 
-## Summary Screen
+Posture must persist for 3 seconds before becoming confirmed.
 
-After session completion:
+Prevents noise from creating unstable visual feedback.
 
--   All bubbles remain
--   Colors dimmed for background effect
--   Title color reflects dominant tilt posture
--   Encouragement message depends on upright percentage
--   Screen remains active for 90 seconds
+---
 
-------------------------------------------------------------------------
+## 6. Visualization Engine
 
-## Software Structure
+### Bubble Generation
 
-READY\
-CALIB\
-SESSION\
-SUMMARY
+Each confirmed posture segment generates a bubble.
 
-------------------------------------------------------------------------
+Bubble size ∝ posture duration.
 
-## Insights
+r = R_MIN + (hold_time / 10s) * (R_MAX - R_MIN)  
+r *= 0.6
 
--   Behavior change works better through awareness than punishment.
--   Temporal filtering is critical in wearable sensing.
--   Calibration is essential for human-centered wearables.
--   Calm computing requires restraint in feedback intensity.
+Bubbles globally reduced by 40% for density balance.
 
-Sprout does not correct posture.\
-It reflects it.
+---
 
-------------------------------------------------------------------------
+### Spatial Anchoring
 
-## Future Improvements
+Each posture has an anchor region:
 
--   WiFi data logging
--   Parent dashboard
--   Long-term growth visualization
--   Multi-device syncing
+- UPRIGHT → Center
+- FORWARD → Top
+- BACKWARD → Bottom
+- LEFT → Left
+- RIGHT → Right
 
-------------------------------------------------------------------------
+Placement logic:
+
+- Gaussian bias around anchor
+- Expands to full screen if crowded
+- Never overlaps on spawn
+
+---
+
+## 7. Physics Engine
+
+Each bubble stores:
+
+- x, y
+- vx, vy
+- radius
+- state
+
+Forces applied:
+
+1. Spring toward anchor
+2. IMU-based tilt force
+3. Inter-bubble repulsion
+4. Boundary collision
+5. Damping
+
+Physics runs at 20Hz for smooth motion.
+
+---
+
+## 8. Embodied Tilt Mapping
+
+Live IMU offsets produce subtle drift:
+
+ax_tilt = pitch_offset * TILT_FORCE  
+ay_tilt = roll_offset  * TILT_FORCE
+
+This creates a direct embodied mapping between posture and motion.
+
+---
+
+## 9. Session Logic
+
+- IMU sampling: 5Hz
+- Physics update: 20Hz
+- State duration accumulation
+- 30-second majority window
+
+Display Layout:
+
+Line 1: Current posture (Schoolbell, scale=2)  
+Line 2: Elapsed time (scale=1)
+
+---
+
+## 10. Summary Screen
+
+After session ends:
+
+- All bubbles retained
+- Colors dimmed (~30% brightness)
+- Rendered behind text
+- Continue drifting
+
+Title color reflects dominant tilt posture.
+
+Encouragement based on upright percentage.
+
+Screen remains active for 90 seconds.
+
+---
+
+## 11. Code Architecture
+
+READY  
+CALIB  
+SESSION  
+SUMMARY  
+
+Core Functions:
+
+- wait_for_button_with_press_blink()
+- calibrate_upright_with_countdown()
+- run_focus_session()
+- step_bubble_physics()
+- show_summary()
+
+Non-blocking timing using time.monotonic().
+
+---
+
+## 12. Coding Challenges
+
+### IMU Noise
+Solved using:
+- Baseline averaging
+- Sustained state confirmation
+- Separate sensor & physics loops
+
+### Display Limitations
+- No alpha blending
+- No rotation for shapes
+- Memory constraints for fonts
+
+Solutions:
+- RGB dimming for background
+- Layer reordering
+- Lightweight physics model
+
+---
+
+## 13. Insights
+
+- Reflection is stronger than interruption.
+- Calibration is essential for wearable sensing.
+- Temporal filtering dramatically improves UX.
+- Calm computing requires reducing feedback intensity.
+- Visualization can encode behavioral memory.
+
+Sprout does not correct posture.
+
+It makes posture visible.
+
+---
+
+## 14. User Roadmap
+
+### Short-Term
+- Add WiFi logging
+- Session statistics export
+- Adjustable sensitivity presets
+
+### Mid-Term
+- Parent dashboard visualization
+- Weekly posture analytics
+- Growth-based tree animation
+
+### Long-Term
+- Multi-device syncing
+- Classroom mesh interaction
+- AI-based posture pattern modeling
+
+---
+
+## 15. Future Directions
+
+- Longitudinal growth narrative
+- Biofeedback personalization
+- Hardware enclosure refinement
+- Lower power optimization
+
+---
 
 ## Demo
 
-(Insert video link here)
+(Insert video link)
+
+---
+
+Developed as part of an IMU wearable systems exploration focusing on embodied sensing and calm computing.
+"""
+
+output_path = "/mnt/data/README_full.md"
+convert_text(readme_full, 'md', format='md', outputfile=output_path, extra_args=['--standalone'])
+
+output_path
