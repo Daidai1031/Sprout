@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🌱 Sprout — TFT Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=Schoolbell&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --teal: #00FF88; --bg: #08080f; --panel: #0d0d1a; --border: #1a1a2e;
+    --mono: 'Share Tech Mono', monospace; --hand: 'Schoolbell', cursive;
+  }
+  body {
+    min-height: 100vh; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-start; padding: 28px 16px 48px; gap: 20px;
+  }
+  .hdr h1 { font-family: var(--hand); font-size: 30px; color: var(--teal); text-align: center; text-shadow: 0 0 24px rgba(0,255,136,0.35); }
+  .hdr p  { font-family: var(--mono); font-size: 9px; color: #2a2a3a; text-align: center; letter-spacing: 0.28em; margin-top: 3px; }
+  .device { background: #0f0f0f; border-radius: 14px; padding: 10px 12px 12px; box-shadow: 0 0 0 1px #222, 0 0 50px rgba(0,255,136,0.05); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .bezel  { font-family: var(--mono); font-size: 7px; color: #1e1e1e; letter-spacing: 0.3em; align-self: flex-start; padding-left: 2px; }
+  #screen { display: block; border-radius: 3px; box-shadow: 0 0 0 1px #1a1a1a, inset 0 0 20px rgba(0,0,0,0.9); }
+  .hw-row { display: flex; gap: 12px; padding-top: 4px; }
+  .hw-btn { width:26px; height:26px; border-radius:50%; border:1px solid #222; background:#0a0a0a; cursor:pointer; position:relative; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:7px; transition:box-shadow 0.15s; }
+  .hw-btn:hover { filter: brightness(1.4); }
+  .hw-btn .lbl { position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); font-family:var(--mono); font-size:7px; white-space:nowrap; color:#333; }
+  .hw-btn.dim { opacity:0.25; pointer-events:none; }
+  .wake { background:transparent; border:1px dashed #1a1a1a; border-radius:20px; padding:4px 18px; color:#222; font-family:var(--mono); font-size:8px; letter-spacing:0.2em; cursor:pointer; transition:all 0.2s; }
+  .wake:hover { border-color:#444; color:#555; }
+  .ctrl { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px 18px; width:480px; max-width:96vw; display:none; flex-direction:column; gap:12px; }
+  .ctrl.show { display:flex; }
+  .ctrl-lbl { font-family:var(--mono); font-size:8px; color:#2a2a2a; letter-spacing:0.28em; }
+  .presets  { display:flex; flex-wrap:wrap; gap:6px; }
+  .pbtn { font-family:var(--hand); font-size:13px; padding:4px 11px; border:1px solid #1e1e1e; border-radius:4px; background:transparent; color:#444; cursor:pointer; transition:all 0.12s; }
+  .pbtn:hover { border-color:#444; color:#888; }
+  .pbtn.on { border-color:var(--pc); color:var(--pc); background:color-mix(in srgb,var(--pc) 10%,transparent); }
+  .slrow { display:grid; grid-template-columns:1fr 1fr; gap:8px 20px; }
+  .sg label { display:flex; justify-content:space-between; margin-bottom:4px; font-family:var(--mono); font-size:8px; color:#3a3a3a; }
+  .sg label span { color:#555; }
+  input[type=range] { width:100%; accent-color:var(--ac,#00ff88); cursor:pointer; }
+  .sustain-wrap { height:3px; background:#111; border-radius:2px; overflow:hidden; }
+  .sustain-bar  { height:100%; width:0%; border-radius:2px; transition:background 0.2s; }
+  .sind  { display:flex; align-items:center; gap:8px; }
+  .sdot  { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .sname { font-family:var(--hand); font-size:15px; }
+  .shint { font-family:var(--mono); font-size:8px; color:#2a2a2a; margin-left:auto; }
+  .legend { display:none; flex-wrap:wrap; gap:14px; justify-content:center; }
+  .legend.show { display:flex; }
+  .li { display:flex; align-items:center; gap:5px; font-family:var(--mono); font-size:8px; color:#3a3a3a; letter-spacing:0.08em; }
+  .ld { width:7px; height:7px; border-radius:50%; }
+  .flowhint { font-family:var(--mono); font-size:8px; color:#181828; letter-spacing:0.18em; text-align:center; line-height:2.2; }
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>🌱 Sprout</h1>
+  <p>TFT DISPLAY SIMULATOR · 240 × 135</p>
+</div>
+<div class="device">
+  <div class="bezel">ESP32-S2 FEATHER · REVERSE TFT</div>
+  <canvas id="screen"></canvas>
+  <div class="hw-row">
+    <div class="hw-btn dim" id="b10" style="color:#00FF88;border-color:#00FF88;">D0<div class="lbl">10 min</div></div>
+    <div class="hw-btn dim" id="b20" style="color:#FFAA00;border-color:#FFAA00;">D1<div class="lbl">20 min</div></div>
+    <div class="hw-btn dim" id="b30" style="color:#FF4444;border-color:#FF4444;">D2<div class="lbl">30 min</div></div>
+  </div>
+  <button class="wake" id="wake">✋ wave to wake</button>
+</div>
+<div class="ctrl" id="ctrl">
+  <div class="ctrl-lbl">POSTURE SIMULATION</div>
+  <div class="presets" id="presets"></div>
+  <div class="slrow">
+    <div class="sg"><label>ROLL (fwd / back) <span id="rv">0°</span></label><input type="range" id="rs" min="-25" max="25" step="0.5" value="0" /></div>
+    <div class="sg"><label>PITCH (left / right) <span id="pv">0°</span></label><input type="range" id="ps" min="-25" max="25" step="0.5" value="0" /></div>
+  </div>
+  <div>
+    <div style="font-family:var(--mono);font-size:7px;color:#2a2a2a;letter-spacing:0.2em;margin-bottom:4px;">SUSTAIN (3 s to confirm new state)</div>
+    <div class="sustain-wrap"><div class="sustain-bar" id="sbar"></div></div>
+  </div>
+  <div class="sind">
+    <div class="sdot" id="sdot"></div>
+    <div class="sname" id="sname">UPRIGHT</div>
+    <div class="shint" id="shint"></div>
+  </div>
+</div>
+<div class="legend" id="legend">
+  <div class="li"><div class="ld" style="background:#00FF00"></div>UPRIGHT</div>
+  <div class="li"><div class="ld" style="background:#FF0000"></div>FORWARD</div>
+  <div class="li"><div class="ld" style="background:#808080"></div>BACKWARD</div>
+  <div class="li"><div class="ld" style="background:#FF8800"></div>LEFT</div>
+  <div class="li"><div class="ld" style="background:#FFFF00"></div>RIGHT</div>
+</div>
+<div class="flowhint" id="flowhint">WAVE → SELECT DURATION → CALIBRATE → FOCUS SESSION</div>
+
+<script>
+const LW=240,LH=135,CSS_SCALE=2;
+const DPR=window.devicePixelRatio||1,PX=CSS_SCALE*DPR;
+const canvas=document.getElementById('screen');
+canvas.width=LW*PX; canvas.height=LH*PX;
+canvas.style.width=(LW*CSS_SCALE)+'px'; canvas.style.height=(LH*CSS_SCALE)+'px';
+const ctx=canvas.getContext('2d');
+ctx.scale(PX,PX);
+const CX=LW/2,CY=LH/2;
+
+const R_MIN=5,R_MAX=22,R_MAP_MAX=10,SHRINK=0.6;
+const MAX_BUBBLES=20,PAD=2;
+const SPRING_K=0.010,DAMPING=0.86,REPULSE_K=0.6;
+const TILT_FORCE=0.35,TILT_CLAMP=20;
+const SUSTAIN_SEC=3.0,SAMPLE_DT=0.2,PHYS_DT=0.05;
+const SUMMARY_DUR=90;
+
+const COLORS={UPRIGHT:'#00FF00',FORWARD:'#FF0000',BACKWARD:'#808080',LEFT:'#FF8800',RIGHT:'#FFFF00'};
+const ANCHOR={UPRIGHT:[CX,CY+28],FORWARD:[CX,CY-LH*0.24],BACKWARD:[CX,CY+LH*0.24],LEFT:[CX-LW*0.30,CY],RIGHT:[CX+LW*0.30,CY]};
+const STATES=['UPRIGHT','FORWARD','BACKWARD','LEFT','RIGHT'];
+
+let phase='idle',selMin=10,totalSec=0,calibCount=5;
+let confirmed='UPRIGHT',candidate='UPRIGHT',candidateT=0;
+let segState='UPRIGHT',segT=0,sessionStart=0;
+let durMap={},bubbles=[];
+let rollV=0,pitchV=0;
+let blinkOn=true,blinkAcc=0,prevLoopT=0;
+let sumMsg='',sumColor='#fff',sumPct=0,sumTime=SUMMARY_DUR;
+let lastSampleT=0,lastPhysT=0;
+
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+function classify(ro,po){
+  if(Math.abs(ro)<6&&Math.abs(po)<6)return'UPRIGHT';
+  if(ro<-9)return'FORWARD';if(ro>9)return'BACKWARD';
+  if(po<-6)return'LEFT';if(po>6)return'RIGHT';
+  return'UPRIGHT';
+}
+
+function holdToR(sec){
+  const t=clamp(sec,0,R_MAP_MAX);
+  return Math.max(2,Math.round(clamp(R_MIN+Math.round((t/R_MAP_MAX)*(R_MAX-R_MIN)),R_MIN,R_MAX)*SHRINK));
+}
+
+function dimHex(hex,f=0.32){
+  const n=parseInt(hex.slice(1),16);
+  return`rgb(${Math.round(((n>>16)&255)*f)},${Math.round(((n>>8)&255)*f)},${Math.round((n&255)*f)})`;
+}
+
+function pickPos(state,r){
+  const[ax,ay]=ANCHOR[state];
+  for(let i=0;i<80;i++){
+    const t=i/79,sx=14+t*(LW*0.45),sy=14+t*(LH*0.45);
+    const z=Math.sqrt(-2*Math.log(Math.max(1e-9,Math.random())))*Math.cos(2*Math.PI*Math.random());
+    const z2=Math.sqrt(-2*Math.log(Math.max(1e-9,Math.random())))*Math.sin(2*Math.PI*Math.random());
+    let x=Math.round(ax+z*sx),y=Math.round(ay+z2*sy);
+    x=clamp(x,r+1,LW-r-2);y=clamp(y,r+1,LH-r-2);
+    if(bubbles.every(b=>{const dx=x-b.x,dy=y-b.y,md=r+b.r+PAD;return dx*dx+dy*dy>=md*md;}))return[x,y];
+  }
+  return[clamp(ax,r+1,LW-r-2),clamp(ay,r+1,LH-r-2)];
+}
+
+function addBubble(state,holdSec){
+  const r=holdToR(holdSec);
+  const[x,y]=pickPos(state,r);
+  bubbles.push({x,y,vx:0,vy:0,r,state});
+  if(bubbles.length>MAX_BUBBLES)bubbles.shift();
+}
+
+function stepPhysics(po,ro){
+  const pt=clamp(po,-TILT_CLAMP,TILT_CLAMP)*TILT_FORCE;
+  const rt=clamp(ro,-TILT_CLAMP,TILT_CLAMP)*TILT_FORCE;
+  for(const b of bubbles){const[ax,ay]=ANCHOR[b.state];b.vx=(b.vx+(ax-b.x)*SPRING_K+pt)*DAMPING;b.vy=(b.vy+(ay-b.y)*SPRING_K+rt)*DAMPING;}
+  for(let i=0;i<bubbles.length;i++)for(let j=i+1;j<bubbles.length;j++){
+    const bi=bubbles[i],bj=bubbles[j],dx=bj.x-bi.x,dy=bj.y-bi.y,d2=dx*dx+dy*dy,md=bi.r+bj.r+PAD;
+    if(d2<md*md&&d2>1e-6){const d=Math.sqrt(d2),pen=(md-d)*REPULSE_K,nx=dx/d,ny=dy/d;bi.vx-=nx*pen;bi.vy-=ny*pen;bj.vx+=nx*pen;bj.vy+=ny*pen;}
+  }
+  for(const b of bubbles){
+    b.x+=b.vx;b.y+=b.vy;
+    if(b.x<b.r+1){b.x=b.r+1;b.vx*=-0.4;}if(b.x>LW-b.r-2){b.x=LW-b.r-2;b.vx*=-0.4;}
+    if(b.y<b.r+1){b.y=b.r+1;b.vy*=-0.4;}if(b.y>LH-b.r-2){b.y=LH-b.r-2;b.vy*=-0.4;}
+  }
+}
+
+function txt(s,x,y,sz,col,al='center'){
+  ctx.save();ctx.font=sz+'px Schoolbell,cursive';ctx.fillStyle=col;ctx.textAlign=al;ctx.textBaseline='alphabetic';ctx.fillText(s,x,y);ctx.restore();
+}
+
+function drawBubbles(dim){
+  for(const b of bubbles){
+    ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+    ctx.fillStyle=dim?dimHex(COLORS[b.state]):COLORS[b.state];ctx.globalAlpha=dim?0.7:0.9;ctx.fill();ctx.globalAlpha=1;
+  }
+}
+
+function scanlines(){for(let y=0;y<LH;y+=2){ctx.fillStyle='rgba(0,0,0,0.13)';ctx.fillRect(0,y,LW,1);}}
+
+function draw(){
+  ctx.fillStyle='#000';ctx.fillRect(0,0,LW,LH);
+  if(phase==='idle'){txt('●',CX,CY+4,9,'#1a1a1a');}
+  else if(phase==='ready'){
+    txt('10 min',6,16,8,'#00FF88','left');txt('20 min',6,CY+4,8,'#FFAA00','left');txt('30 min',6,LH-10,8,'#FF4444','left');
+    ctx.strokeStyle='#1e1e1e';ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(36,4);ctx.lineTo(36,LH-4);ctx.stroke();
+    txt('Hi Daisy,',CX+24,LH*0.37,11,'#cccccc');txt('ready?',CX+24,LH*0.56,13,'#00FF00');
+    ctx.save();ctx.font='13px serif';ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillText('🌱',CX+60,LH*0.87);ctx.restore();
+    if(blinkOn)txt('press a button  →',CX+18,LH*0.81,7,'#555555');
+  }
+  else if(phase==='calib'){
+    txt('Sit up straight',CX,LH*0.34,10,'#cccccc');txt(String(calibCount),CX-18,LH*0.74,32,'#00FF00');
+    ctx.save();ctx.font='20px serif';ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillText('🌳',CX+28,LH*0.74);ctx.restore();
+  }
+  else if(phase==='session'){
+    drawBubbles(false);
+    txt(confirmed,CX,CY-5,11,COLORS[confirmed]);
+    const elap=Math.round(performance.now()/1000-sessionStart);
+    txt(`${Math.floor(elap/60)}m ${String(elap%60).padStart(2,'0')}s  /  ${selMin}m`,CX,CY+15,7,'#777777');
+    const prog=clamp(elap/totalSec,0,1);
+    ctx.fillStyle='#181818';ctx.fillRect(6,LH-7,LW-12,3);ctx.fillStyle=COLORS[confirmed];ctx.fillRect(6,LH-7,(LW-12)*prog,3);
+  }
+  else if(phase==='summary'){
+    drawBubbles(true);ctx.fillStyle='rgba(0,0,0,0.50)';ctx.fillRect(0,0,LW,LH);
+    txt('Session Complete',CX,LH*0.22,10,sumColor);txt(`${sumPct}% upright time`,CX,LH*0.38,7,'#777777');
+    sumMsg.split('\n').forEach((l,i)=>txt(l,CX,LH*0.53+i*12,8,'#dddddd'));
+    txt(`back to sleep in ${sumTime}s`,CX,LH*0.90,6,'#333333');
+  }
+  scanlines();
+}
+
+function loop(ts){
+  const now=ts/1000,dt=now-prevLoopT;prevLoopT=now;
+  if(phase==='ready'){blinkAcc+=dt;if(blinkOn&&blinkAcc>0.55){blinkOn=false;blinkAcc=0;}else if(!blinkOn&&blinkAcc>0.25){blinkOn=true;blinkAcc=0;}}
+  if(phase==='session'){
+    const elap=now-sessionStart;
+    if(elap>=totalSec){addBubble(segState,now-segT);doSummary();draw();return;}
+    if(now-lastSampleT>=SAMPLE_DT){
+      lastSampleT=now;
+      const raw=classify(rollV,pitchV);
+      durMap[raw]=(durMap[raw]||0)+SAMPLE_DT;
+      if(raw!==candidate){candidate=raw;candidateT=now;}
+      else if(raw!==confirmed){
+        const held=now-candidateT;
+        if(held>=SUSTAIN_SEC){
+          addBubble(segState,candidateT-segT);
+          confirmed=raw;segState=raw;segT=candidateT;candidateT=now;
+        }
+        setSBar(clamp((now-candidateT)/SUSTAIN_SEC,0,1),COLORS[raw]);
+      }else{setSBar(1,COLORS[confirmed]);}
+      updateCtrlUI();
+    }
+    if(now-lastPhysT>=PHYS_DT){lastPhysT=now;stepPhysics(pitchV,rollV);}
+  }
+  if(phase==='summary'&&now-lastPhysT>=PHYS_DT){lastPhysT=now;stepPhysics(2.0,-1.5);}
+  draw();requestAnimationFrame(loop);
+}
+
+function doSummary(){
+  const up=durMap['UPRIGHT']||0,pct=totalSec>0?(up/totalSec)*100:0;
+  sumPct=Math.round(pct);
+  if(pct<10){sumMsg="Next time, sit tall\nso the little tree grows.";sumColor=COLORS.FORWARD;}
+  else if(pct<30){sumMsg="Not bad.\nKeep helping the tree grow.";sumColor=COLORS.LEFT;}
+  else{sumMsg="Awesome!\nYour little tree is strong.";sumColor=COLORS.UPRIGHT;}
+  sumTime=SUMMARY_DUR;phase='summary';updateUI();
+  const id=setInterval(()=>{sumTime--;if(sumTime<=0){clearInterval(id);phase='idle';bubbles=[];updateUI();}},1000);
+}
+
+function startSession(){
+  const now=performance.now()/1000;
+  durMap=Object.fromEntries(STATES.map(s=>[s,0]));bubbles=[];
+  confirmed='UPRIGHT';candidate='UPRIGHT';candidateT=now;
+  segState='UPRIGHT';segT=now;sessionStart=now;
+  lastSampleT=now;lastPhysT=now;
+  phase='session';updateUI();updateCtrlUI();setSBar(1,COLORS['UPRIGHT']);
+}
+
+function startCalib(min){
+  selMin=min;totalSec=min*60;calibCount=5;phase='calib';updateUI();
+  let c=5;const id=setInterval(()=>{c--;calibCount=c;if(c<=0){clearInterval(id);startSession();}},1000);
+}
+
+function setSBar(frac,col){
+  const b=document.getElementById('sbar');
+  b.style.width=(frac*100)+'%';b.style.background=col;b.style.boxShadow=frac>0.99?`0 0 6px ${col}`:'none';
+}
+
+function updateCtrlUI(){
+  const raw=classify(rollV,pitchV),col=COLORS[raw];
+  document.getElementById('rv').textContent=rollV+'°';
+  document.getElementById('pv').textContent=pitchV+'°';
+  document.documentElement.style.setProperty('--ac',col);
+  const dot=document.getElementById('sdot');dot.style.background=col;dot.style.boxShadow=`0 0 8px ${col}`;
+  document.getElementById('sname').textContent=raw;document.getElementById('sname').style.color=col;
+  const isPending=raw!==confirmed;
+  const rem=isPending?Math.max(0,SUSTAIN_SEC-(performance.now()/1000-candidateT)):0;
+  document.getElementById('shint').textContent=isPending?`${rem.toFixed(1)}s to confirm…`:'✓ confirmed';
+  document.querySelectorAll('.pbtn').forEach((b,i)=>{
+    const ps=classify(PRESETS[i].roll,PRESETS[i].pitch);
+    b.classList.toggle('on',ps===raw);b.style.setProperty('--pc',COLORS[ps]);
+  });
+}
+
+const PRESETS=[{label:'Sit straight',roll:0,pitch:0},{label:'Lean forward',roll:-12,pitch:0},{label:'Lean back',roll:12,pitch:0},{label:'Tilt left',roll:0,pitch:-9},{label:'Tilt right',roll:0,pitch:9}];
+const presetsEl=document.getElementById('presets');
+PRESETS.forEach(p=>{
+  const b=document.createElement('button');b.className='pbtn';b.textContent=p.label;
+  b.onclick=()=>{rollV=p.roll;pitchV=p.pitch;document.getElementById('rs').value=rollV;document.getElementById('ps').value=pitchV;updateCtrlUI();};
+  presetsEl.appendChild(b);
+});
+document.getElementById('rs').oninput=e=>{rollV=parseFloat(e.target.value);updateCtrlUI();};
+document.getElementById('ps').oninput=e=>{pitchV=parseFloat(e.target.value);updateCtrlUI();};
+document.getElementById('wake').onclick=()=>{if(phase==='idle'){phase='ready';updateUI();}};
+document.getElementById('b10').onclick=()=>{if(phase==='ready')startCalib(10);};
+document.getElementById('b20').onclick=()=>{if(phase==='ready')startCalib(20);};
+document.getElementById('b30').onclick=()=>{if(phase==='ready')startCalib(30);};
+
+function updateUI(){
+  document.getElementById('ctrl').classList.toggle('show',phase==='session');
+  document.getElementById('legend').classList.toggle('show',phase==='session'||phase==='summary');
+  document.getElementById('flowhint').style.display=phase==='idle'?'block':'none';
+  document.getElementById('wake').style.display=phase==='idle'?'block':'none';
+  ['b10','b20','b30'].forEach(id=>document.getElementById(id).classList.toggle('dim',phase!=='ready'));
+}
+
+prevLoopT=performance.now()/1000;
+updateUI();draw();
+document.fonts.ready.then(()=>draw());
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
