@@ -294,7 +294,7 @@ This system was intended to make studying feel:
 <td align="center">My Garden</td>
 </tr>
 </table>
----
+
 
 ## Future Directions
 
