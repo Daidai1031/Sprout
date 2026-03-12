@@ -279,7 +279,7 @@ This system was intended to make studying feel:
 <table>
 <tr>
 <td align="center"><img src="assets/ui/home.png" width="140"/></td>
-<td align="center"><img src="assets/ui/sensor-detecting.png" width="140"/></td>
+<td align="center"><img src="assets/ui/sensor_detecting.png" width="140"/></td>
 <td align="center"><img src="assets/ui/session-goodposture.png" width="140"/></td>
 <td align="center"><img src="assets/ui/session-badposture.png" width="140"/></td>
 <td align="center"><img src="assets/ui/break.png" width="140"/></td>
