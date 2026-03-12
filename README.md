@@ -259,6 +259,27 @@ All timing is managed via `time.monotonic()` comparisons rather than `time.sleep
 
 ---
 
+## Software Interface Design
+
+The software experience of **Sprout** is designed as a calm, garden-based interaction system that transforms posture and focus into visible growth. Instead of using warnings or rigid productivity cues, the interface gives students soft environmental feedback through plants, time, and progress.
+
+The interface includes six key screens:
+1. a **home screen** for selecting different “seeds” as study modes,
+2. a **sensor detection screen** to verify posture before starting,
+3. a **good-posture session screen** that rewards healthy study behavior,
+4. a **break screen** with a recovery timer,
+5. a **bad-posture session screen** that reflects posture issues through weakened plant states,
+6. and a **garden dashboard** that summarizes long-term growth and study progress.
+
+This system was intended to make studying feel:
+- more nurturing than corrective,
+- more embodied than screen-centered,
+- and more motivating through gradual visual progress.
+
+<img width="3076" height="1065" alt="software" src="https://github.com/user-attachments/assets/83924119-3061-4fd0-9e6e-08ae41c6cbf6" />
+
+---
+
 ## Future Directions
 
 **Sensor Fusion**  
