@@ -276,8 +276,24 @@ This system was intended to make studying feel:
 - more embodied than screen-centered,
 - and more motivating through gradual visual progress.
 
-<img width="3076" height="1065" alt="software" src="https://github.com/user-attachments/assets/83924119-3061-4fd0-9e6e-08ae41c6cbf6" />
-
+<table>
+<tr>
+<td align="center"><img src="assets/ui/home.png" width="140"/></td>
+<td align="center"><img src="assets/ui/sensor-detecting.png" width="140"/></td>
+<td align="center"><img src="assets/ui/session-goodposture.png" width="140"/></td>
+<td align="center"><img src="assets/ui/session-badposture.png" width="140"/></td>
+<td align="center"><img src="assets/ui/break.png" width="140"/></td>
+<td align="center"><img src="assets/ui/mygarden.png" width="140"/></td>
+</tr>
+<tr>
+<td align="center">Home</td>
+<td align="center">Sensor</td>
+<td align="center">Good Posture</td>
+<td align="center">Bad Posture</td>
+<td align="center">Break</td>
+<td align="center">My Garden</td>
+</tr>
+</table>
 ---
 
 ## Future Directions
